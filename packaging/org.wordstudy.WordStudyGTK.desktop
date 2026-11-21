@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=WordStudy GTK
+Comment=Linux Bible study application with MySword module support
+Exec=/opt/wordstudy-gtk/run.sh
+Icon=accessories-text-editor
+Terminal=false
+Categories=Education;Reference;
+Keywords=Bible;MySword;Scripture;Study;
