@@ -47,7 +47,7 @@ python3 -m wordstudy.sample --install
 ## Where to Get Modules
 
 - Bibles: <https://www.ph4.org/b4_index.php>
-- Bibles, commentari# WordStudy GTK
+- Bibles, commentaries: <https://www.mysword.info/>
 
 Native Linux Bible study application built with GTK 3 and Python. Reads unencrypted MySword and MyBible SQLite modules; it is not a port of theWord, MySword, or MyBible.
 
