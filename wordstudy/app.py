@@ -942,7 +942,7 @@ class StudyWindow(Gtk.ApplicationWindow):
             return
         buffer = Gtk.TextBuffer()
         tags = self._make_tags(buffer)
-        self._append(buffer, f"{self.current_book.label}\\n{self._map_topic}\\n\\n", [tags["heading"]])
+        self._append(buffer, f"{self.current_book.label}\n{self._map_topic}\n\n", [tags["heading"]])
         self._append_markup(buffer, self._map_article, tags, module=self.current_book,
                             zoom_images=self.map_zoom_bar.get_visible())
         self.book_reader_view.set_buffer(buffer)
