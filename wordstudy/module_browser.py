@@ -35,9 +35,15 @@ class ModuleBrowser(Gtk.Dialog):
         self.busy = False
         self.closed = False
         self.connect("destroy", lambda *_: setattr(self, "closed", True))
-        area = self.get_content_area()
-        area.set_spacing(8)
-        area.set_border_width(12)
+        dialog_area = self.get_content_area()
+        dialog_area.set_spacing(8)
+        dialog_area.set_border_width(12)
+        notebook = Gtk.Notebook()
+        notebook.set_hexpand(True)
+        notebook.set_vexpand(True)
+        dialog_area.pack_start(notebook, True, True, 0)
+        area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        notebook.append_page(area, Gtk.Label(label="MyBible"))
         info = Gtk.Label(label="Android MyBible catalog • Bibles, commentaries and dictionaries supported", xalign=0)
         area.pack_start(info, False, False, 0)
         top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
@@ -89,18 +95,6 @@ class ModuleBrowser(Gtk.Dialog):
         self.download_button = Gtk.Button.new_with_label("Download selected")
         self.download_button.connect("clicked", self.download)
         bottom.pack_end(self.download_button, False, False, 0)
-        # Keep the existing MyBible controls in their own notebook page.
-        # Reparent after construction to preserve the established signal wiring.
-        mybible_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        for child in list(area.get_children()):
-            child.ref()  # Keep widgets alive while moving between GTK containers.
-            area.remove(child)
-            mybible_page.pack_start(child, child is scroll, child is scroll, 0)
-            child.unref()
-        notebook = Gtk.Notebook()
-        notebook.set_hexpand(True)
-        notebook.set_vexpand(True)
-        notebook.append_page(mybible_page, Gtk.Label(label="MyBible"))
         self.mysword_tab = MySwordTab(parent)
         notebook.append_page(self.mysword_tab, Gtk.Label(label="MySword"))
         notebook.connect("switch-page", self._on_page_changed)
