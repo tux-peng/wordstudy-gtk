@@ -93,8 +93,10 @@ class ModuleBrowser(Gtk.Dialog):
         # Reparent after construction to preserve the established signal wiring.
         mybible_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         for child in list(area.get_children()):
+            child.ref()  # Keep widgets alive while moving between GTK containers.
             area.remove(child)
             mybible_page.pack_start(child, child is scroll, child is scroll, 0)
+            child.unref()
         notebook = Gtk.Notebook()
         notebook.set_hexpand(True)
         notebook.set_vexpand(True)
