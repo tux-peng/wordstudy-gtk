@@ -124,6 +124,7 @@ class StudyWindow(Gtk.ApplicationWindow):
         self._apply_preferences()
         self.connect("delete-event", self._on_close)
         self.show_all()
+        self.map_zoom_bar.hide()  # Hidden initially; shown for illustrated articles.
         self.search_revealer.set_reveal_child(False)
         self.search_revealer.hide()
         self.parallel_scroller.hide()
@@ -266,7 +267,7 @@ class StudyWindow(Gtk.ApplicationWindow):
         self.map_zoom_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         self.map_zoom_bar.set_margin_start(12)
         self.map_zoom_bar.set_margin_bottom(5)
-        self.map_zoom_bar.set_no_show_all(True)
+        # Do not set no-show-all here: it suppresses show_all() for map articles.
         for label, value in (("Fit to Window", None), ("100%", 1.0)):
             button = Gtk.Button.new_with_label(label)
             button.connect("clicked", lambda _button, zoom=value: self._set_map_zoom(zoom))
