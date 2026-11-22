@@ -17,7 +17,7 @@ BASE = "https://www.mysword.info/download-mysword/"
 CATEGORIES = {
     "bibles": "Bible", "commentaries": "Commentary",
     "dictionaries": "Dictionary", "books": "Book",
-    "journals": "Journal",
+    "journals": "Journal", "graphics": "Map",
 }
 MAX_PAGE = 3 * 1024 * 1024
 
@@ -90,16 +90,24 @@ def parse_mysword_page(page: bytes, kind: str) -> list[MySwordEntry]:
     return list(unique.values())
 
 
-def fetch_mysword_catalog() -> tuple[list[MySwordEntry], list[str]]:
-    entries, errors = [], []
-    for category, kind in CATEGORIES.items():
-        try:
-            page = _read_url(BASE + category, MAX_PAGE)
-            entries.extend(parse_mysword_page(page, kind))
-        except (DownloadError, OSError, ValueError) as error:
-            errors.append(f"{category}: {error}")
-    unique = {(entry.kind, entry.url): entry for entry in entries}
-    return sorted(unique.values(), key=lambda e: (e.kind, e.language, e.name.casefold())), errors
+def fetch_mysword_catalog(category: str, language: str) -> tuple[list[MySwordEntry], list[str]]:
+    """Fetch only a selected official category page, then filter by language.
+
+    No network request occurs until the caller explicitly invokes this method.
+    The site groups modules by language on each category page.
+    """
+    if category not in CATEGORIES:
+        raise ValueError("Select a MySword module category")
+    if not language:
+        raise ValueError("Select a language")
+    try:
+        page = _read_url(BASE + category, MAX_PAGE)
+        entries = parse_mysword_page(page, CATEGORIES[category])
+    except (DownloadError, OSError, ValueError) as error:
+        return [], [f"{category}: {error}"]
+    selected = [entry for entry in entries
+                if language == "all" or entry.language.casefold() == language.casefold()]
+    return sorted(selected, key=lambda e: (e.language.casefold(), e.name.casefold())), []
 
 
 def install_mysword(entry: MySwordEntry, library: Library) -> list[Module]:
