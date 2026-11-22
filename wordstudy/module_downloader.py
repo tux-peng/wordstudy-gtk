@@ -63,7 +63,7 @@ def parse_registry(payload: bytes) -> list[CatalogModule]:
                     payload = f.read(MAX_REGISTRY + 1)
         if len(payload) > MAX_REGISTRY:
             raise DownloadError("Registry exceeds size limit")
-        data = json.loads(payload)
+        data = json.loads(payload.decode("utf-8-sig"))
     except (ValueError, UnicodeError, OSError, zipfile.BadZipFile) as exc:
         raise DownloadError(f"Invalid registry: {exc}") from exc
     if not isinstance(data, dict) or not isinstance(data.get("downloads"), list):
@@ -79,14 +79,17 @@ def parse_registry(payload: bytes) -> list[CatalogModule]:
         abbreviation = str(item.get("abr") or "").replace(" (renamed)", "").strip()
         if not isinstance(filename, str) or Path(filename).name != filename or not abbreviation:
             continue
-        suffix = filename[len(abbreviation)+1:].lower() if filename.lower().startswith((abbreviation + ".").lower()) else ""
-        # The ZIP filename is a transport wrapper; the contained file is .SQLite3.
-        if suffix.endswith((".zip", ".gz")):
-            suffix = suffix.rsplit(".", 1)[0]
-        if not suffix.endswith(".sqlite3"):
-            continue
-        category = suffix.removesuffix(".sqlite3").removesuffix(".")
-        if category not in TYPE_MAP:
+        # Registry 'fil' is a logical module identifier, not a SQLite filename.
+        # The repository serves ZIP archives whose members contain SQLite modules.
+        lower = filename.lower()
+        if lower.endswith(".commentaries"):
+            kind = "Commentary"
+        elif lower.endswith(".dictionary"):
+            kind = "Dictionary"
+        elif "." not in filename or lower.endswith(".sqlite3"):
+            kind = "Bible"
+        else:
+            # Plans, devotions, bundles, cross-references, etc. aren't yet supported.
             continue
         raw_urls = item.get("url", [])
         if isinstance(raw_urls, str):
@@ -106,12 +109,12 @@ def parse_registry(payload: bytes) -> list[CatalogModule]:
                 name = match.group(2) or filename
                 if not name or "/" in name or "\\" in name:
                     continue
-                resolved = hosts[match.group(1)].replace("%s", urllib.parse.quote(name, safe=""))
+                resolved = hosts[match.group(1)].replace("%s", urllib.parse.quote(urllib.parse.unquote(name), safe=""))
             if urllib.parse.urlsplit(resolved).scheme in ("http", "https") and resolved not in urls:
                 urls.append(resolved)
         if urls:
             modules.append(CatalogModule(abbreviation, str(item.get("des") or abbreviation),
-                           str(item.get("lng") or ""), filename, TYPE_MAP[category],
+                           str(item.get("lng") or ""), filename + ".zip", kind,
                            str(item.get("upd") or ""), str(item.get("siz") or ""), tuple(urls)))
     return sorted(modules, key=lambda m: (m.kind, m.language, m.abbreviation.casefold()))
 
