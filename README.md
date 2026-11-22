@@ -9,6 +9,7 @@ Native Linux Bible study application built with GTK 3 and Python. Reads unencryp
 - Display words of Christ in red when marked by a module: MySword `<FR>…<Fr>` or HTML color, or MyBible `<J>…</J>`.
 - Toggle Strong’s and morphology displays; adjust fonts and wrapping in Preferences.
 - Import `.mybible`, `.SQLite3`, `.gz`, and `.zip` files.
+- Browse and download supported MyBible Android registry modules directly from the GTK application.
 
 ## Run
 
@@ -43,6 +44,10 @@ Install sample modules with:
 python3 -m wordstudy.sample --install
 ```
 
+## Online MyBible Module Downloader
+
+Click **Download Modules** in the header. The **MyBible (Recommended)** tab fetches the Android MyBible module registry. In the **MySword** tab, select a language and a module type (Bible, Book, Dictionary, Map, Commentary, or Journal), then click **Browse selected** to fetch only that category page and filter it by language. Opening MySword does not make any network request. Search, select, and download supported files into the same local library. The default registry URL is editable in the dialog. Only Bible, commentary, and dictionary modules are currently supported. Downloads use the registry-provided mirrors, which may include plain HTTP; only install content from sources you trust. Network access is required. The MySword website currently warns it may be busy and suggests using the Android app; the public pages or download links may become unavailable, in which case manually importing a downloaded file remains supported.
+
 ## Where to Get Modules
 
 - Bibles: <https://www.ph4.org/b4_index.php>
@@ -50,7 +55,7 @@ python3 -m wordstudy.sample --install
 
 ## Use
 
-Import a Bible (`.bbl.mybible` or `.SQLite3`), then import commentaries, dictionaries, books, or map collections from **Import Modules**. Choose a book topic on the right to open it in the center reader. Select **Bible reader** to return to the chapter view.
+Import a Bible (`.bbl.mybible` or `.SQLite3`), then import commentaries, dictionaries, books, or map collections from **Import Modules**. Choose a book topic on the right to open it in the center reader. Select **Bible reader** to return to the chapter view. When an article contains map images, the reader shows **Fit to Window**, **100%**, **−**, and **+** controls. Zoom affects map images, not Bible text.
 
 Modules are stored in `~/.local/share/wordstudy-gtk/modules/`. Notes are stored in `personal.sqlite3`.
 
