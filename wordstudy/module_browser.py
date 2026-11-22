@@ -3,6 +3,7 @@ from __future__ import annotations
 import threading
 from gi.repository import GLib, Gtk
 from .module_downloader import REGISTRY_URL, fetch_catalog, install_module
+from .mysword_tab import MySwordTab
 
 # The Android registry uses ISO codes (e.g. ACV has lng="en"), not
 # display names. Keep the original code for filtering and show a readable label.
@@ -88,8 +89,26 @@ class ModuleBrowser(Gtk.Dialog):
         self.download_button = Gtk.Button.new_with_label("Download selected")
         self.download_button.connect("clicked", self.download)
         bottom.pack_end(self.download_button, False, False, 0)
+        # Keep the existing MyBible controls in their own notebook page.
+        # Reparent after construction to preserve the established signal wiring.
+        mybible_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        for child in list(area.get_children()):
+            area.remove(child)
+            mybible_page.pack_start(child, child is scroll, child is scroll, 0)
+        notebook = Gtk.Notebook()
+        notebook.set_hexpand(True)
+        notebook.set_vexpand(True)
+        notebook.append_page(mybible_page, Gtk.Label(label="MyBible"))
+        self.mysword_tab = MySwordTab(parent)
+        notebook.append_page(self.mysword_tab, Gtk.Label(label="MySword"))
+        notebook.connect("switch-page", self._on_page_changed)
+        area.pack_start(notebook, True, True, 0)
         self.show_all()
         self.refresh()
+
+    def _on_page_changed(self, notebook, page, index):
+        if index == 1 and not self.mysword_tab.loaded and not self.mysword_tab.loading:
+            self.mysword_tab.refresh()
 
     def set_busy(self, value):
         self.busy = value
