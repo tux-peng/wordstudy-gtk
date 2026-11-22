@@ -43,7 +43,7 @@ class ModuleBrowser(Gtk.Dialog):
         notebook.set_vexpand(True)
         dialog_area.pack_start(notebook, True, True, 0)
         area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        notebook.append_page(area, Gtk.Label(label="MyBible"))
+        notebook.append_page(area, Gtk.Label(label="MyBible (Recommended)"))
         info = Gtk.Label(label="Android MyBible catalog • Bibles, commentaries and dictionaries supported", xalign=0)
         area.pack_start(info, False, False, 0)
         top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
@@ -98,13 +98,12 @@ class ModuleBrowser(Gtk.Dialog):
         self.mysword_tab = MySwordTab(parent)
         notebook.append_page(self.mysword_tab, Gtk.Label(label="MySword"))
         notebook.connect("switch-page", self._on_page_changed)
-        area.pack_start(notebook, True, True, 0)
         self.show_all()
         self.refresh()
 
     def _on_page_changed(self, notebook, page, index):
-        if index == 1 and not self.mysword_tab.loaded and not self.mysword_tab.loading:
-            self.mysword_tab.refresh()
+        # MySword only connects after selecting a language/type and clicking Browse.
+        pass
 
     def set_busy(self, value):
         self.busy = value
