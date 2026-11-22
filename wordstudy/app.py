@@ -8,6 +8,7 @@ from typing import Callable
 from gi.repository import Gdk, Gio, GLib, Gtk, Pango
 
 from .markup import Span, plain_text, styled_spans
+from .module_browser import ModuleBrowser
 from .modules import Hit, Library, Module, ModuleError
 from .preferences import DisplayPreferences, PreferencesStore, compact_module_name
 from .references import ABBR, BOOKS, Reference, parse_reference
@@ -139,6 +140,10 @@ class StudyWindow(Gtk.ApplicationWindow):
         import_btn.set_tooltip_text("Import MySword .mybible or MyBible.zone .SQLite3 files, including .gz / .zip")
         import_btn.connect("clicked", self._import_files)
         header.pack_end(import_btn)
+        download_btn = Gtk.Button.new_with_label("Download Modules")
+        download_btn.set_tooltip_text("Browse the MyBible Android module catalog")
+        download_btn.connect("clicked", lambda *_: ModuleBrowser(self))
+        header.pack_end(download_btn)
         prefs_btn = Gtk.Button.new_with_label("Preferences")
         prefs_btn.set_tooltip_text("Fonts, wrapping, Strong's, morphology and red letters")
         prefs_btn.connect("clicked", self._open_preferences)
