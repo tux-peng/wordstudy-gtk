@@ -122,10 +122,27 @@ class ModuleBrowser(Gtk.Dialog):
         self.store.clear()
         self.language.handler_block_by_func(self.apply_filter)
         self.language.remove_all()
-        self.language.append_text("All languages")
-        for language in sorted({m.language for m in catalog if m.language}):
+        self.language.append("all", "All languages")
+        available = {m.language for m in catalog if m.language}
+        # Keep common ISO codes at the top instead of burying them among
+        # hundreds of language names such as "En Ngixo".
+        preferred = GLib.get_language_names()
+        locale_codes = []
+        for tag in preferred:
+            code = tag.split(".", 1)[0].split("@", 1)[0].replace("-", "_")
+            locale_codes.extend((code, code.split("_", 1)[0]))
+        selected = next((code for code in locale_codes if code in available), None)
+        # When a regional locale is absent, fall back to the base language.
+        if selected is None:
+            selected = next((code for code in locale_codes
+                             if code.lower() in {v.lower() for v in available}), None)
+        pinned = [code for code in ("en", "es", "fr", "de", "pt", "ru")
+                  if code in available]
+        ordered = pinned + sorted(available.difference(pinned),
+                                  key=lambda code: (language_label(code).casefold(), code.casefold()))
+        for language in ordered:
             self.language.append(language, language_label(language) + " [" + language + "]")
-        self.language.set_active(0)
+        self.language.set_active_id(selected if selected in available else "all")
         self.language.handler_unblock_by_func(self.apply_filter)
         for i, item in enumerate(catalog):
             self.store.append((item.abbreviation, item.description, item.language,
@@ -140,7 +157,7 @@ class ModuleBrowser(Gtk.Dialog):
         language = self.language.get_active_id()
         return ((not query or query in (model[iterator][0] + " " + model[iterator][1]).casefold())
                 and (kind == "All types" or model[iterator][3] == kind)
-                and (language == "all" or model[iterator][2] == language))
+                and (language in (None, "all") or model[iterator][2] == language))
 
     def apply_filter(self, *_):
         self.filtered.refilter()
