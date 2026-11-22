@@ -55,7 +55,7 @@ Click **Download Modules** in the header. The **MyBible (Recommended)** tab fetc
 
 ## Use
 
-Import a Bible (`.bbl.mybible` or `.SQLite3`), then import commentaries, dictionaries, books, or map collections from **Import Modules**. Choose a book topic on the right to open it in the center reader. Select **Bible reader** to return to the chapter view.
+Import a Bible (`.bbl.mybible` or `.SQLite3`), then import commentaries, dictionaries, books, or map collections from **Import Modules**. Choose a book topic on the right to open it in the center reader. Select **Bible reader** to return to the chapter view. When an article contains map images, the reader shows **Fit to Window**, **100%**, **−**, and **+** controls. Zoom affects map images, not Bible text.
 
 Modules are stored in `~/.local/share/wordstudy-gtk/modules/`. Notes are stored in `personal.sqlite3`.
 
