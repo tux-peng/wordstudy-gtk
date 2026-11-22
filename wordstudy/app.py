@@ -22,8 +22,6 @@ window { background: @theme_bg_color; }
 .sidebar { border-right: 1px solid alpha(@theme_fg_color, .12); }
 .rightbar { border-left: 1px solid alpha(@theme_fg_color, .12); }
 .bibleview, .articleview { font-family: 'Noto Serif', 'Liberation Serif', serif; font-size: 15px; }
-.bibleview { min-height: 520px; }
-.biblescroll { min-height: 520px; }
 textview text { background: @theme_base_color; }
 .entrylabel { font-size: 12px; font-weight: bold; opacity: .75; }
 .statusline { padding: 5px 10px; border-top: 1px solid alpha(@theme_fg_color, .12); }
@@ -124,6 +122,7 @@ class StudyWindow(Gtk.ApplicationWindow):
         self.connect("delete-event", self._on_close)
         self.show_all()
         self.search_revealer.set_reveal_child(False)
+        self.search_revealer.hide()
         self.parallel_scroller.hide()
         self.bible_reader_btn.hide()
         self.reader_stack.set_visible_child_name("bible")
@@ -212,14 +211,16 @@ class StudyWindow(Gtk.ApplicationWindow):
         search_btn.connect("clicked", self._do_search)
         search_row.pack_start(search_btn, False, False, 0)
 
-        horizontal = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        self.sidebar_pane = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        horizontal = self.sidebar_pane
         horizontal.set_wide_handle(True)
+        horizontal.set_position(185)
         outer.pack_start(horizontal, True, True, 0)
         sidebar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         sidebar.get_style_context().add_class("sidebar")
         sidebar.set_size_request(140, -1)
         sidebar.set_border_width(8)
-        horizontal.pack1(sidebar, resize=False, shrink=True)
+        horizontal.pack1(sidebar, resize=True, shrink=False)
         sidebar.pack_start(_label("BOOKS", "entrylabel"), False, False, 3)
         self.book_list = Gtk.ListBox()
         self.book_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
@@ -239,6 +240,7 @@ class StudyWindow(Gtk.ApplicationWindow):
 
         self.main_pane = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
         self.main_pane.set_wide_handle(True)
+        self.main_pane.set_position(850)
         horizontal.pack2(self.main_pane, resize=True, shrink=True)
         self.center_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.main_pane.pack1(self.center_column, resize=True, shrink=True)
@@ -263,17 +265,17 @@ class StudyWindow(Gtk.ApplicationWindow):
         self.center_column.set_vexpand(True)
         self.bible_view = _view(css_class="bibleview")
         self.bible_view.connect("button-release-event", self._on_text_click)
-        self.primary_scroller = _scroll(self.bible_view, min_height=520)
+        self.primary_scroller = _scroll(self.bible_view)
         self.primary_scroller.get_style_context().add_class("biblescroll")
         self.reader_box.pack_start(self.primary_scroller, True, True, 0)
         self.parallel_view = _view(css_class="bibleview")
         self.parallel_view.connect("button-release-event", self._on_text_click)
-        self.parallel_scroller = _scroll(self.parallel_view, min_height=520)
+        self.parallel_scroller = _scroll(self.parallel_view)
         self.parallel_scroller.get_style_context().add_class("biblescroll")
         self.reader_box.pack_start(self.parallel_scroller, True, True, 0)
         self.book_reader_view = _view(css_class="bibleview")
         self.book_reader_view.connect("button-release-event", self._on_text_click)
-        self.book_reader_scroller = _scroll(self.book_reader_view, min_height=520)
+        self.book_reader_scroller = _scroll(self.book_reader_view)
         self.book_reader_scroller.get_style_context().add_class("biblescroll")
         self.reader_stack = Gtk.Stack()
         self.reader_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
@@ -283,6 +285,7 @@ class StudyWindow(Gtk.ApplicationWindow):
         self.center_column.pack_start(self.reader_stack, True, True, 0)
 
         self.search_revealer = Gtk.Revealer()
+        self.search_revealer.set_no_show_all(True)
         self.search_revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_UP)
         results_col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
         results_head = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
@@ -290,7 +293,7 @@ class StudyWindow(Gtk.ApplicationWindow):
         results_head.set_margin_start(9)
         results_head.pack_start(self.result_label, True, True, 0)
         close_btn = Gtk.Button.new_with_label("Close results")
-        close_btn.connect("clicked", lambda *_: self.search_revealer.set_reveal_child(False))
+        close_btn.connect("clicked", self._hide_search_results)
         results_head.pack_end(close_btn, False, False, 0)
         results_col.pack_start(results_head, False, False, 0)
         self.result_list = Gtk.ListBox()
@@ -304,7 +307,7 @@ class StudyWindow(Gtk.ApplicationWindow):
         study = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         study.get_style_context().add_class("rightbar")
         study.set_size_request(240, -1)
-        self.main_pane.pack2(study, resize=False, shrink=True)
+        self.main_pane.pack2(study, resize=True, shrink=False)
         self.notebook = Gtk.Notebook()
         study.pack_start(self.notebook, True, True, 0)
         self._make_commentary_tab()
@@ -979,6 +982,11 @@ class StudyWindow(Gtk.ApplicationWindow):
         if getattr(row, "reference", None):
             self.navigate(row.reference)
 
+    def _hide_search_results(self, *_args: object) -> None:
+        """Return all vertical space to the chapter reader."""
+        self.search_revealer.set_reveal_child(False)
+        self.search_revealer.hide()
+
     def _do_search(self, *_args: object) -> None:
         term = self.search_entry.get_text().strip()
         if not term:
@@ -1019,6 +1027,7 @@ class StudyWindow(Gtk.ApplicationWindow):
                 self.result_list.add(row)
             self.result_list.show_all()
             self.result_label.set_text(f"SEARCH RESULTS · {len(hits)} (max 200) · double-click to open")
+            self.search_revealer.show()
             self.search_revealer.set_reveal_child(True)
             self._set_status(f"Found {len(hits)} result(s) for “{term}”")
         except (ModuleError, sqlite3.DatabaseError) as error:
