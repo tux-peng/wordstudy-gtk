@@ -4,6 +4,25 @@ import threading
 from gi.repository import GLib, Gtk
 from .module_downloader import REGISTRY_URL, fetch_catalog, install_module
 
+# The Android registry uses ISO codes (e.g. ACV has lng="en"), not
+# display names. Keep the original code for filtering and show a readable label.
+LANGUAGE_NAMES = {
+    "en": "English", "es": "Spanish", "fr": "French", "de": "German",
+    "pt": "Portuguese", "ru": "Russian", "zh": "Chinese", "ja": "Japanese",
+    "ko": "Korean", "it": "Italian", "nl": "Dutch", "pl": "Polish",
+    "uk": "Ukrainian", "ar": "Arabic", "iw": "Hebrew", "he": "Hebrew",
+    "grc": "Ancient Greek", "el": "Greek", "ro": "Romanian",
+    "fi": "Finnish", "hu": "Hungarian", "cs": "Czech",
+    "bg": "Bulgarian", "id": "Indonesian", "ta": "Tamil",
+}
+
+def language_label(code):
+    if not code:
+        return "Unknown"
+    parts = code.split(" ", 1)
+    name = LANGUAGE_NAMES.get(parts[0].lower(), parts[0])
+    return name + ((" (" + parts[1] + ")") if len(parts) > 1 else "")
+
 class ModuleBrowser(Gtk.Dialog):
     def __init__(self, parent):
         super().__init__(title="Download MyBible Modules", transient_for=parent)
@@ -43,7 +62,7 @@ class ModuleBrowser(Gtk.Dialog):
         self.kind.connect("changed", self.apply_filter)
         filters.pack_start(self.kind, False, False, 0)
         self.language = Gtk.ComboBoxText()
-        self.language.append_text("All languages")
+        self.language.append("all", "All languages")
         self.language.set_active(0)
         self.language.connect("changed", self.apply_filter)
         filters.pack_start(self.language, False, False, 0)
@@ -105,7 +124,7 @@ class ModuleBrowser(Gtk.Dialog):
         self.language.remove_all()
         self.language.append_text("All languages")
         for language in sorted({m.language for m in catalog if m.language}):
-            self.language.append_text(language)
+            self.language.append(language, language_label(language) + " [" + language + "]")
         self.language.set_active(0)
         self.language.handler_unblock_by_func(self.apply_filter)
         for i, item in enumerate(catalog):
@@ -118,10 +137,10 @@ class ModuleBrowser(Gtk.Dialog):
     def visible(self, model, iterator, _data=None):
         query = self.search.get_text().strip().casefold()
         kind = self.kind.get_active_text()
-        language = self.language.get_active_text()
+        language = self.language.get_active_id()
         return ((not query or query in (model[iterator][0] + " " + model[iterator][1]).casefold())
                 and (kind == "All types" or model[iterator][3] == kind)
-                and (language == "All languages" or model[iterator][2] == language))
+                and (language == "all" or model[iterator][2] == language))
 
     def apply_filter(self, *_):
         self.filtered.refilter()
