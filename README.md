@@ -9,6 +9,7 @@ Native Linux Bible study application built with GTK 3 and Python. Reads unencryp
 - Display words of Christ in red when marked by a module: MySword `<FR>…<Fr>` or HTML color, or MyBible `<J>…</J>`.
 - Toggle Strong’s and morphology displays; adjust fonts and wrapping in Preferences.
 - Import `.mybible`, `.SQLite3`, `.gz`, and `.zip` files.
+- Browse and download supported MyBible Android registry modules directly from the GTK application.
 
 ## Run
 
@@ -42,6 +43,10 @@ Install sample modules with:
 ```sh
 python3 -m wordstudy.sample --install
 ```
+
+## Online MyBible Module Downloader
+
+Click **Download Modules** in the header to fetch the Android MyBible module registry, search and filter by language/type, select modules, and download them into the local library. The default registry URL is editable in the dialog. Only Bible, commentary, and dictionary modules are currently supported. Downloads use the registry-provided mirrors, which may include plain HTTP; only install content from sources you trust. Network access is required.
 
 ## Where to Get Modules
 
