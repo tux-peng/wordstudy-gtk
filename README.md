@@ -11,6 +11,37 @@ Native Linux Bible study application built with GTK 3 and Python. Reads unencryp
 - Import `.mybible`, `.SQLite3`, `.gz`, and `.zip` files.
 - Browse and download supported MyBible Android registry modules directly from the GTK application.
 
+## Install with pip or pipx
+
+GTK 3 and PyGObject must first be installed with your Linux distribution's
+package manager (they are not bundled in the Python wheel). For Artix/Arch:
+
+```sh
+sudo pacman -S python python-gobject gtk3 python-pip python-pipx
+```
+
+From a clone of this repository, use **pipx** (recommended) or a private pip venv:
+
+```sh
+bash install-pip.sh pipx
+# Alternatively:
+bash install-pip.sh pip
+```
+
+The installer checks GTK dependencies and creates an application-menu shortcut.
+Launch with `wordstudy-gtk` (ensure `~/.local/bin` is in PATH).
+The pip installer uses `~/.local/share/wordstudy-gtk-venv`, not a
+system-wide `pip install`. Both modes expose the distribution's PyGObject
+bindings to the isolated environment via `--system-site-packages`.
+
+You can also install directly:
+
+```sh
+pipx install --python /usr/bin/python3 --system-site-packages .
+# Or in an activated venv made with python3 -m venv --system-site-packages:
+python -m pip install .
+```
+
 ## Run
 
 Install the dependencies for your distribution, then run `./run.sh` from this directory.
