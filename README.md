@@ -28,7 +28,7 @@ bash install-pip.sh pipx
 bash install-pip.sh pip
 ```
 
-The installer checks GTK dependencies and creates an application-menu shortcut.
+The installer checks GTK dependencies and creates an application-menu shortcut. It also installs the scalable WordStudy Bible icon into `~/.local/share/icons/hicolor/scalable/apps/` and references it from the desktop entry at `~/.local/share/applications/org.wordstudy.WordStudyGTK.desktop` (or the corresponding XDG data directory).
 Launch with `wordstudy-gtk` (ensure `~/.local/bin` is in PATH).
 The pip installer uses `~/.local/share/wordstudy-gtk-venv`, not a
 system-wide `pip install`. Both modes expose the distribution's PyGObject
