@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wordstudy-gtk"
+version = "0.3.0"
+description = "Native GTK Bible study application for MySword and MyBible modules"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "WordStudy GTK contributors"}]
+dependencies = []
+
+[project.scripts]
+wordstudy-gtk = "wordstudy.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["wordstudy*"]
