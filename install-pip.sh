@@ -9,6 +9,9 @@ PYTHON="${PYTHON:-/usr/bin/python3}"
 VENV_DIR="${VENV_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/wordstudy-gtk-venv}"
 BIN_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
 APPLICATIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+ICON_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/scalable/apps"
+ICON_NAME="org.wordstudy.WordStudyGTK"
+ICON_SOURCE="$SOURCE_DIR/packaging/$ICON_NAME.svg"
 
 usage() {
     printf 'Usage: %s [pip|pipx] [--no-desktop]\n' "$0"
@@ -59,10 +62,16 @@ EOF
 fi
 
 if [[ "${2:-}" != "--no-desktop" ]]; then
-    mkdir -p "$APPLICATIONS_DIR"
-    sed "s|^Exec=.*|Exec=$LAUNCH|" \
+    mkdir -p "$APPLICATIONS_DIR" "$ICON_DIR"
+    install -m 0644 "$ICON_SOURCE" "$ICON_DIR/$ICON_NAME.svg"
+    # Use a themed icon name so the desktop environment can resolve it at any scale.
+    sed -e "s|^Exec=.*|Exec=$LAUNCH|" \
+        -e "s|^Icon=.*|Icon=$ICON_NAME|" \
         "$SOURCE_DIR/packaging/org.wordstudy.WordStudyGTK.desktop" \
-        > "$APPLICATIONS_DIR/org.wordstudy.WordStudyGTK.desktop"
+        > "$APPLICATIONS_DIR/$ICON_NAME.desktop"
+    if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+        gtk-update-icon-cache -f -t "${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor" >/dev/null 2>&1 || true
+    fi
 fi
 printf '\nInstalled WordStudy GTK via %s.\nLaunch: %s\n' "$METHOD" "$LAUNCH"
 printf 'Ensure %s is included in your PATH for the wordstudy-gtk command.\n' "$BIN_DIR"
